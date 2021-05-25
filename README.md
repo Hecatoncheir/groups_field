@@ -1,4 +1,4 @@
-#GroupsField [![Actions Status](https://github.com/Hecatoncheir/groups_field/workflows/check/badge.svg)](https://github.com/Hecatoncheir/groups_field/actions)
+# GroupsField [![Actions Status](https://github.com/Hecatoncheir/groups_field/workflows/check/badge.svg)](https://github.com/Hecatoncheir/groups_field/actions)
 
 Group widgets by some attribute.
 
