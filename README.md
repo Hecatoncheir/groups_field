@@ -73,7 +73,7 @@ Widget build(BuildContext context) {
 
 ```
 
-## TRY:
+### TRY:
 
 ```
 git clone https://github.com/Hecatoncheir/groups_field.git
@@ -81,14 +81,14 @@ cd groups_field/example && flutter create .
 flutter run
 ```
 
-### `isScrollable = true` (default):
+#### `isScrollable = true` (default):
 ![With scrollable preview](/preview/with_scrollable.gif)
 
 
-### `isScrollable = false`:
+#### `isScrollable = false`:
 ![Without scrollable preview](/preview/without_scrollable.gif)
 
 
-## TODO:
+### TODO:
 - [ ] Make navigation by mouse cursor.
 - [ ] Make navigation by keyboard arrows.
