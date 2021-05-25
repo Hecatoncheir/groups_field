@@ -73,6 +73,17 @@ Widget build(BuildContext context) {
 
 ```
 
+---
+
+#### `isScrollable = true` (default):
+![With scrollable preview](/preview/with_scrollable.gif)
+
+
+#### `isScrollable = false`:
+![Without scrollable preview](/preview/without_scrollable.gif)
+
+---
+
 ### TRY:
 
 ```
@@ -81,12 +92,7 @@ cd groups_field/example && flutter create .
 flutter run
 ```
 
-#### `isScrollable = true` (default):
-![With scrollable preview](/preview/with_scrollable.gif)
 
-
-#### `isScrollable = false`:
-![Without scrollable preview](/preview/without_scrollable.gif)
 
 
 ### TODO:
