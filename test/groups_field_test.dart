@@ -8,7 +8,7 @@ import 'package:groups_field/groups_field.dart';
 
 void main() {
   group("GroupsField", () {
-    late List<Group> groupment;
+    late List<Group> groups;
 
     setUpAll(() {
       final firstGroup = Group<String>(
@@ -29,7 +29,7 @@ void main() {
         existFields: [1, 2],
       );
 
-      groupment = [
+      groups = [
         firstGroup,
         secondGroup,
       ];
@@ -43,7 +43,7 @@ void main() {
         (tester) async {
           final testWidget = GroupsField(
             isScrollable: isScrollable,
-            groups: groupment,
+            groups: groups,
           );
 
           final widget = MaterialApp(
@@ -55,7 +55,7 @@ void main() {
           await tester.pumpWidget(widget);
           await tester.pumpAndSettle();
 
-          expect(find.byKey(Key("GroupsField")), findsOneWidget);
+          expect(find.byKey(const Key("GroupsField")), findsOneWidget);
 
           expect(find.text("FirstGroup1"), findsOneWidget);
           expect(find.text("FirstGroup2"), findsOneWidget);
@@ -74,7 +74,7 @@ void main() {
         (tester) async {
           final testWidget = GroupsField(
             isScrollable: isScrollable,
-            groups: groupment,
+            groups: groups,
           );
 
           final widget = MaterialApp(
@@ -86,7 +86,7 @@ void main() {
           await tester.pumpWidget(widget);
           await tester.pumpAndSettle();
 
-          expect(find.byKey(Key("GroupsField")), findsOneWidget);
+          expect(find.byKey(const Key("GroupsField")), findsOneWidget);
 
           expect(find.text("FirstGroup1"), findsOneWidget);
           expect(find.text("FirstGroup2"), findsOneWidget);

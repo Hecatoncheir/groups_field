@@ -78,7 +78,51 @@ class _MyHomePageState extends State<MyHomePage> {
           "Second simple group",
         ],
         fieldBuilder: (value) {
-          return Text("First! " + value);
+          return Container(
+            margin: EdgeInsets.symmetric(
+              horizontal: 2,
+              vertical: 3,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              color: Color(0xFF9eabc0),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.only(
+                    top: 3,
+                    right: 3,
+                    bottom: 3,
+                    left: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                  child: Text(
+                    "Simple group! ",
+                    style: TextStyle(
+                      color: Color(0xFFffffff),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 3,
+                  ),
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                      color: Color(0xFFffffff),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
         });
 
     int _idForCreatedTag = 2;
@@ -97,17 +141,85 @@ class _MyHomePageState extends State<MyHomePage> {
         Tag(id: 1, name: "1"),
       ],
       suggestions: tagsSuggestions,
-      fieldBuilder: (value) => Text("#" + value.name),
+      suggestionBuilder: (tag) {
+        return Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: 6,
+            vertical: 3,
+          ),
+          padding: EdgeInsets.symmetric(
+            horizontal: 6,
+            vertical: 3,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            color: Color(0xFF53b9ea),
+          ),
+          child: Text(
+            tag.name,
+            style: TextStyle(
+              color: Color(0xFFffffff),
+            ),
+          ),
+        );
+      },
+      fieldBuilder: (value) {
+        return Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: 2,
+            vertical: 3,
+          ),
+          padding: EdgeInsets.symmetric(
+            horizontal: 6,
+            vertical: 3,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            color: Color(0xFF53b9ea),
+          ),
+          child: Text(
+            "#" + value.name,
+            style: TextStyle(
+              color: Color(0xFFffffff),
+            ),
+          ),
+        );
+      },
     );
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: Row(
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        margin: const EdgeInsets.symmetric(
+          horizontal: 6,
+          vertical: 3,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
+            color: Colors.lightBlue,
+          ),
+        ),
+        child: Row(
           children: [
-            const Text("Tags:"),
+            Container(
+              margin: EdgeInsets.only(right: 12),
+              child: const Text(
+                "Search:",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
             Expanded(
               child: GroupsField(
+                isScrollable: true,
                 groups: [
                   simpleGroup,
                   tagsGroup,
@@ -116,5 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-      );
+      ),
+    );
+  }
 }

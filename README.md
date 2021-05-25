@@ -29,8 +29,8 @@ void initState() {
   int _idForCreatedTag = 2;
 
   final tagsSuggestions = [
-    Tag(id: 1, name: "First tag"),
-    Tag(id: 2, name: "Second tag"),
+    Tag(id: 2, name: "Tag 2"),
+    Tag(id: 3, name: "Tag 3"),
   ];
 
   tagsGroup = Group<Tag>(
@@ -38,8 +38,8 @@ void initState() {
     getString: (value) => value.name,
     onCreate: (text) async => Tag(id: _idForCreatedTag++, name: text),
     existFields: [
-      Tag(id: 0, name: "0"),
-      Tag(id: 1, name: "1"),
+      Tag(id: 0, name: "Tag 0"),
+      Tag(id: 1, name: "Tag 1"),
     ],
     suggestions: tagsSuggestions,
     fieldBuilder: (value) => Text("#" + value.name),
@@ -52,8 +52,9 @@ void initState() {
 ##### Add groups to GroupsField widget:
 ```dart
 
-  @override
-  Widget build(BuildContext context) => Scaffold(
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
     body: Row(
       children: [
         Text("Tags:"),
@@ -68,6 +69,7 @@ void initState() {
       ],
     ),
   );
+}
 
 ```
 
@@ -79,8 +81,13 @@ cd groups_field/example && flutter create .
 flutter run
 ```
 
-### Something like gitlab searchbar:
-![Gitlab searchbar preview](/preview/gitlab_search.png)
+### `isScrollable = true` (default):
+![With scrollable preview](/preview/with_scrollable.gif)
+
+
+### `isScrollable = false`:
+![Without scrollable preview](/preview/without_scrollable.gif)
+
 
 ## TODO:
 - [ ] Make navigation by mouse cursor.
