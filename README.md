@@ -2,6 +2,16 @@
 
 Group widgets by some attribute.
 
+`isScrollable = true` (default):
+
+![With scrollable preview](/preview/with_scrollable.gif)
+
+
+`isScrollable = false`:
+
+![Without scrollable preview](/preview/without_scrollable.gif)
+
+---
 
 ## HowTo:
 
@@ -75,14 +85,7 @@ Widget build(BuildContext context) {
 
 ---
 
-#### `isScrollable = true` (default):
-![With scrollable preview](/preview/with_scrollable.gif)
 
-
-#### `isScrollable = false`:
-![Without scrollable preview](/preview/without_scrollable.gif)
-
----
 
 ### TRY:
 
