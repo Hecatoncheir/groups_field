@@ -123,7 +123,7 @@ class _GroupsFieldState extends State<GroupsField> {
             event is SuggestionSelect)
         .listen((state) {
       if (state is GroupExistedFieldsWidgetsDone) {
-        SchedulerBinding.instance!.addPostFrameCallback(
+        SchedulerBinding.instance.addPostFrameCallback(
           (timeStamp) {
             final lastChildElement =
                 _lastFieldKey.currentContext?.findRenderObject() as RenderBox?;
@@ -154,7 +154,7 @@ class _GroupsFieldState extends State<GroupsField> {
           );
         }
 
-        SchedulerBinding.instance!.addPostFrameCallback(
+        SchedulerBinding.instance.addPostFrameCallback(
           (timeStamp) {
             final lastChildElement = _lastFieldKey.currentContext == null
                 ? null
@@ -188,7 +188,7 @@ class _GroupsFieldState extends State<GroupsField> {
 
         _textEditingController.clear();
 
-        SchedulerBinding.instance!.addPostFrameCallback(
+        SchedulerBinding.instance.addPostFrameCallback(
           (timeStamp) {
             final lastChildElement =
                 _lastFieldKey.currentContext!.findRenderObject() as RenderBox;
@@ -211,7 +211,7 @@ class _GroupsFieldState extends State<GroupsField> {
       }
 
       if (state is SuggestionsReady) {
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
           if (_overlayEntry != null) {
             _overlayEntry!.remove();
             _overlayEntry = null;
@@ -284,7 +284,7 @@ class _GroupsFieldState extends State<GroupsField> {
         _overlayEntry?.remove();
         _overlayEntry = null;
 
-        SchedulerBinding.instance!.addPostFrameCallback(
+        SchedulerBinding.instance.addPostFrameCallback(
           (timeStamp) {
             final lastChildElement =
                 _lastFieldKey.currentContext!.findRenderObject() as RenderBox;
@@ -307,7 +307,7 @@ class _GroupsFieldState extends State<GroupsField> {
       }
     });
 
-    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       _groupsFieldBloc.eventController.add(PrepareExistedGroupsFieldsWidgets());
     });
   }
@@ -329,7 +329,7 @@ class _GroupsFieldState extends State<GroupsField> {
   Widget buildLayout(BuildContext context) {
     return NotificationListener<SizeChangedLayoutNotification>(
       onNotification: (notification) {
-        SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
+        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
           final lastChildElement =
               _lastFieldKey.currentContext?.findRenderObject() as RenderBox?;
 
