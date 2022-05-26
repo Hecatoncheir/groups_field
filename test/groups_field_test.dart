@@ -15,8 +15,8 @@ void main() {
         attribute: "",
         onCreate: null,
         getString: (value) => value,
-        fieldBuilder: (field) => Text(field),
-        suggestionBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
+        suggestionBuilder: Text.new,
         existFields: ["FirstGroup1", "FirstGroup2"],
       );
 

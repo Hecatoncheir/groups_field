@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:pedantic/pedantic.dart';
 
@@ -304,13 +303,11 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
     required List<String> symbols,
     required String text,
   }) {
-    String _text = text;
-
+    String updatedText = text;
     for (final symbol in symbols) {
-      _text = _text.replaceAll(symbol, "");
+      updatedText = updatedText.replaceAll(symbol, "");
     }
-
-    return _text;
+    return updatedText;
   }
 
   @visibleForTesting
@@ -329,7 +326,7 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
     required String text,
     required List<Group> groups,
   }) {
-    Group? _group;
+    Group? updatedGroup;
 
     for (final group in groups) {
       if (group.attribute.isEmpty) continue;
@@ -340,13 +337,13 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
         final attributeInText = text.substring(0, groupAttribute.length);
 
         if (group.attribute == attributeInText) {
-          _group = group;
+          updatedGroup = group;
           break;
         }
       }
     }
 
-    return _group;
+    return updatedGroup;
   }
 
   @visibleForTesting
@@ -354,15 +351,15 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
     required String attribute,
     required List<Group> groups,
   }) {
-    Group? _group;
+    Group? updatedGroup;
     for (final group in groups) {
       if (group.attribute == attribute) {
-        _group = group;
+        updatedGroup = group;
         break;
       }
     }
 
-    return _group;
+    return updatedGroup;
   }
 
   @visibleForTesting

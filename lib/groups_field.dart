@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 import 'bloc/groups_field_bloc.dart';
 import 'group.dart';
@@ -41,12 +42,12 @@ class GroupsField extends StatefulWidget {
   final Function(Object field, Group group)? onSomeFieldOfGroupCreated;
   final Function(Object field, Group group)? onSomeFieldOfGroupSelected;
 
-  final String keyForTriggerRemoveField;
+  final LogicalKeyboardKey keyForTriggerRemoveField;
   final Function? onSubmitted;
 
   const GroupsField({
     required this.groups,
-    Key? key,
+    super.key,
     this.delimiters = const [',', ' '],
     this.isScrollable = true,
     this.isFieldCanBeDeleted = true,
@@ -57,12 +58,12 @@ class GroupsField extends StatefulWidget {
     this.onSomeFieldOfGroupRemoved,
     this.onSomeFieldOfGroupCreated,
     this.onSomeFieldOfGroupSelected,
-    this.keyForTriggerRemoveField = "Backspace",
+    this.keyForTriggerRemoveField = LogicalKeyboardKey.backspace,
     this.onSubmitted,
-  }) : super(key: key);
+  });
 
   @override
-  _GroupsFieldState createState() => _GroupsFieldState();
+  State<GroupsField> createState() => _GroupsFieldState();
 }
 
 class _GroupsFieldState extends State<GroupsField> {
@@ -392,8 +393,8 @@ class _GroupsFieldState extends State<GroupsField> {
               key: _textFieldKey,
               child: RawKeyboardListener(
                 focusNode: _focusNode,
-                onKey: (key) {
-                  if (key.character == widget.keyForTriggerRemoveField) {
+                onKey: (event) {
+                  if (event.logicalKey == widget.keyForTriggerRemoveField) {
                     _isRemovedFieldKeyPressed = true;
                     final currentText = _textEditingController.text;
                     if (currentText.isEmpty) {

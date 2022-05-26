@@ -13,7 +13,7 @@ void main() {
       final firstGroup = Group<String>(
         attribute: "",
         getString: (String value) => value,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
         existFields: ["FirstGroup1", "FirstGroup2"],
       );
 
@@ -53,7 +53,7 @@ void main() {
       final firstGroup = Group<String>(
         attribute: "",
         getString: (value) => value,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
         existFields: ["FirstGroup1", "FirstGroup2"],
       );
 
@@ -99,7 +99,7 @@ void main() {
         attribute: "",
         onCreate: null,
         getString: (value) => value,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
         existFields: ["FirstGroup1", "FirstGroup2"],
       );
 
@@ -159,7 +159,7 @@ void main() {
         attribute: "",
         onCreate: null,
         getString: (value) => value,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
       );
 
       final secondGroup = Group<int>(
@@ -221,7 +221,7 @@ void main() {
       final firstGroup = Group<String>(
         attribute: "",
         getString: (value) => value,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
         onCreate: (text) async => text,
       );
 
@@ -266,7 +266,7 @@ void main() {
         attribute: "",
         onCreate: null,
         getString: (value) => value,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
       );
 
       final secondGroup = Group<int>(
@@ -310,7 +310,7 @@ void main() {
         attribute: "some_attribute",
         onCreate: (field) async => field,
         getString: (field) => field,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
       );
 
       final bloc = GroupsFieldBloc(
@@ -346,7 +346,7 @@ void main() {
         attribute: "",
         onCreate: null,
         getString: (field) => field,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
         suggestions: ["First", "Second", "Conference"],
       );
 
@@ -413,7 +413,7 @@ void main() {
         attribute: "",
         onCreate: null,
         getString: (field) => field,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
         suggestions: ["First", "Second", "Conference"],
         existFields: ["First"],
       );
@@ -443,7 +443,7 @@ void main() {
         attribute: "",
         onCreate: null,
         getString: (field) => field,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
         suggestions: ["First", "Second", "Conference"],
         existFields: ["Second"],
       );
@@ -478,7 +478,7 @@ void main() {
         attribute: "",
         onCreate: null,
         getString: (field) => field,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
         suggestions: ["First", "Second", "Conference"],
         existFields: ["Conference"],
         showSelectedFieldsInSuggestions: false,
@@ -529,7 +529,7 @@ void main() {
         attribute: "#",
         onCreate: null,
         getString: (field) => field,
-        fieldBuilder: (field) => Text(field),
+        fieldBuilder: Text.new,
         suggestions: suggestions,
       );
 
