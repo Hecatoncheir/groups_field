@@ -394,7 +394,8 @@ class _GroupsFieldState extends State<GroupsField> {
               child: RawKeyboardListener(
                 focusNode: _focusNode,
                 onKey: (event) {
-                  if (event.logicalKey == widget.keyForTriggerRemoveField) {
+                  if (event is RawKeyUpEvent &&
+                      event.logicalKey == widget.keyForTriggerRemoveField) {
                     _isRemovedFieldKeyPressed = true;
                     final currentText = _textEditingController.text;
                     if (currentText.isEmpty) {
