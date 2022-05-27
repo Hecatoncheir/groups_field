@@ -206,25 +206,51 @@ class _MyHomePageState extends State<MyHomePage> {
             color: Colors.lightBlue,
           ),
         ),
-        child: Row(
+        child: Column(
           children: [
-            Container(
-              margin: EdgeInsets.only(right: 12),
-              child: const Text(
-                "Search:",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 12),
+                  child: const Text(
+                    "Search:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
+                Expanded(
+                  child: GroupsField(
+                    isScrollable: true,
+                    groups: [
+                      simpleGroup,
+                      tagsGroup,
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              child: GroupsField(
-                isScrollable: true,
-                groups: [
-                  simpleGroup,
-                  tagsGroup,
-                ],
-              ),
+            Row(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 12),
+                  child: const Text(
+                    "Search:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GroupsField(
+                    isScrollable: false,
+                    groups: [
+                      simpleGroup,
+                      tagsGroup,
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),

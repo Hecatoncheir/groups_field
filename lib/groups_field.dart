@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import 'ui/fields_not_scrollable.dart';
+import 'ui/fields_scrollable.dart';
+import 'ui/group_suggestions.dart';
+import 'ui/overlay_container.dart';
+
 import 'bloc/groups_field_bloc.dart';
 import 'group.dart';
 
@@ -80,7 +85,7 @@ class _GroupsFieldState extends State<GroupsField> {
 
   OverlayEntry? _overlayEntry;
 
-  late final GroupsFieldBloc _groupsFieldBloc;
+  late final GroupsFieldBloc _bloc;
 
   @override
   void initState() {
@@ -108,20 +113,22 @@ class _GroupsFieldState extends State<GroupsField> {
     _textFieldFocusNode = FocusNode();
 
     // BloC
-    _groupsFieldBloc = GroupsFieldBloc(
+    _bloc = GroupsFieldBloc(
       delimiters: widget.delimiters,
       groups: widget.groups,
       isScrollable: widget.isScrollable,
       isFieldCanBeDeleted: widget.isFieldCanBeDeleted,
     );
 
-    _groupsFieldBloc.stateStream
-        .where((event) =>
-            event is GroupExistedFieldsWidgetsDone ||
-            event is GroupFieldRemove ||
-            event is NewFieldAdd ||
-            event is SuggestionsReady ||
-            event is SuggestionSelect)
+    _bloc.stateStream
+        .where(
+      (event) =>
+          event is GroupExistedFieldsWidgetsDone ||
+          event is GroupFieldRemove ||
+          event is NewFieldAdd ||
+          event is SuggestionsReady ||
+          event is SuggestionSelect,
+    )
         .listen((state) {
       if (state is GroupExistedFieldsWidgetsDone) {
         SchedulerBinding.instance.addPostFrameCallback(
@@ -141,7 +148,7 @@ class _GroupsFieldState extends State<GroupsField> {
               parentLayoutElement: parentLayoutElement,
             );
 
-            _groupsFieldBloc.eventController.add(event);
+            _bloc.eventController.add(event);
           },
         );
       }
@@ -173,7 +180,7 @@ class _GroupsFieldState extends State<GroupsField> {
               parentLayoutElement: parentLayoutElement,
             );
 
-            _groupsFieldBloc.eventController.add(event);
+            _bloc.eventController.add(event);
           },
         );
       }
@@ -206,7 +213,7 @@ class _GroupsFieldState extends State<GroupsField> {
               parentLayoutElement: parentLayoutElement,
             );
 
-            _groupsFieldBloc.eventController.add(event);
+            _bloc.eventController.add(event);
           },
         );
       }
@@ -243,12 +250,11 @@ class _GroupsFieldState extends State<GroupsField> {
 
             final suggestionsAreaBuilder = widget.suggestionsAreaBuilder;
             if (suggestionsAreaBuilder == null) {
-              suggestionsContainer = buildSuggestions(
-                context: context,
+              suggestionsContainer = GroupSuggestions(
+                bloc: _bloc,
                 suggestions: state.widgets,
                 fields: state.fields,
                 group: state.group,
-                isSuggestionsScrollable: widget.isSuggestionsScrollable,
               );
             } else {
               suggestionsContainer = suggestionsAreaBuilder(
@@ -302,20 +308,20 @@ class _GroupsFieldState extends State<GroupsField> {
               parentLayoutElement: parentLayoutElement,
             );
 
-            _groupsFieldBloc.eventController.add(event);
+            _bloc.eventController.add(event);
           },
         );
       }
     });
 
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      _groupsFieldBloc.eventController.add(PrepareExistedGroupsFieldsWidgets());
+      _bloc.eventController.add(PrepareExistedGroupsFieldsWidgets());
     });
   }
 
   @override
   void dispose() {
-    _groupsFieldBloc.dispose();
+    _bloc.dispose();
     _focusNode.dispose();
     _textFieldFocusNode.dispose();
     _overlayEntry?.remove();
@@ -324,30 +330,10 @@ class _GroupsFieldState extends State<GroupsField> {
 
   @override
   Widget build(BuildContext context) {
-    return buildLayout(context);
-  }
-
-  Widget buildLayout(BuildContext context) {
     return NotificationListener<SizeChangedLayoutNotification>(
+      // ignore: prefer-extracting-callbacks
       onNotification: (notification) {
-        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-          final lastChildElement =
-              _lastFieldKey.currentContext?.findRenderObject() as RenderBox?;
-
-          final parentElement =
-              _fieldsKey.currentContext!.findRenderObject() as RenderBox;
-
-          final parentLayoutElement =
-              _fieldsLayoutKey.currentContext!.findRenderObject() as RenderBox;
-
-          final event = SizeChanged(
-            lastChildElement: lastChildElement,
-            parentElement: parentElement,
-            parentLayoutElement: parentLayoutElement,
-          );
-
-          _groupsFieldBloc.eventController.add(event);
-        });
+        onSizeChanged();
         return true;
       },
       child: SizeChangedLayoutNotifier(
@@ -355,7 +341,30 @@ class _GroupsFieldState extends State<GroupsField> {
           key: const Key("GroupsField"),
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
-              return buildTextFieldLayout(constraints);
+              return Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  buildTextField(constraints),
+                  SizedBox(
+                    key: _fieldsLayoutKey,
+                    width: constraints.maxWidth - widget.textFieldWidth,
+                    child: GestureDetector(
+                      onTap: _textFieldFocusNode.requestFocus,
+                      child: widget.isScrollable
+                          ? FieldsScrollable(
+                              bloc: _bloc,
+                              fieldsKey: _fieldsKey,
+                              lastFieldKey: _lastFieldKey,
+                            )
+                          : FieldsNotScrollable(
+                              bloc: _bloc,
+                              fieldsKey: _fieldsKey,
+                              lastFieldKey: _lastFieldKey,
+                            ),
+                    ),
+                  ),
+                ],
+              );
             },
           ),
         ),
@@ -363,81 +372,89 @@ class _GroupsFieldState extends State<GroupsField> {
     );
   }
 
-  Widget buildTextFieldLayout(BoxConstraints constraints) {
-    return Stack(
-      alignment: Alignment.centerLeft,
-      children: [
-        buildTextField(constraints),
-        GestureDetector(
-          onTap: _textFieldFocusNode.requestFocus,
-          child: buildFieldsLayout(constraints),
-        ),
-      ],
-    );
+  Future<void> onSizeChanged() async {
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      final lastChildElement =
+          _lastFieldKey.currentContext?.findRenderObject() as RenderBox?;
+
+      final parentElement =
+          _fieldsKey.currentContext!.findRenderObject() as RenderBox;
+
+      final parentLayoutElement =
+          _fieldsLayoutKey.currentContext!.findRenderObject() as RenderBox;
+
+      final event = SizeChanged(
+        lastChildElement: lastChildElement,
+        parentElement: parentElement,
+        parentLayoutElement: parentLayoutElement,
+      );
+
+      _bloc.eventController.add(event);
+    });
   }
 
   Widget buildTextField(BoxConstraints constraints) {
     return StreamBuilder<GroupsFieldState>(
-        stream: _groupsFieldBloc.stateStream
-            .where((event) => event is CursorPositionUpdate),
-        builder: (context, snapshot) {
-          final state = snapshot.data;
+      stream: _bloc.stateStream.where((event) => event is CursorPositionUpdate),
+      builder: (context, snapshot) {
+        final state = snapshot.data;
 
-          if (state is CursorPositionUpdate) {
-            final controller = _textEditingController;
-            final cursorPosition = state.cursorPosition;
-            final fieldsSize = state.fieldsSize;
-            final lastFieldSize = state.lastFieldSize;
+        if (state is CursorPositionUpdate) {
+          final controller = _textEditingController;
+          final cursorPosition = state.cursorPosition;
+          final fieldsSize = state.fieldsSize;
+          final lastFieldSize = state.lastFieldSize;
 
-            return Container(
-              key: _textFieldKey,
-              child: RawKeyboardListener(
-                focusNode: _focusNode,
-                onKey: (event) {
-                  if (event is RawKeyUpEvent &&
-                      event.logicalKey == widget.keyForTriggerRemoveField) {
-                    _isRemovedFieldKeyPressed = true;
-                    final currentText = _textEditingController.text;
-                    if (currentText.isEmpty) {
-                      if (_overlayEntry != null) {
-                        _overlayEntry!.remove();
-                        _overlayEntry = null;
-                      }
-
-                      textFieldOnChangeHandler(
-                        context: context,
-                        fieldText: _textEditingController.text,
-                        isRemoved: _isRemovedFieldKeyPressed,
-                      );
+          return Container(
+            key: _textFieldKey,
+            child: RawKeyboardListener(
+              focusNode: _focusNode,
+              onKey: (event) {
+                if (event is RawKeyUpEvent &&
+                    event.logicalKey == widget.keyForTriggerRemoveField) {
+                  _isRemovedFieldKeyPressed = true;
+                  final currentText = _textEditingController.text;
+                  if (currentText.isEmpty) {
+                    if (_overlayEntry != null) {
+                      _overlayEntry!.remove();
+                      _overlayEntry = null;
                     }
-                  } else {
-                    _isRemovedFieldKeyPressed = false;
+
+                    textFieldOnChangeHandler(
+                      context: context,
+                      fieldText: _textEditingController.text,
+                      isRemoved: _isRemovedFieldKeyPressed,
+                    );
                   }
-                },
-                child: widget.textFieldBuilder == null
-                    ? textFieldBuilder(
-                        context: context,
-                        constrains: constraints,
-                        controller: controller,
-                        cursorPosition: cursorPosition,
-                        fieldsSize: fieldsSize,
-                        lastFieldSize: lastFieldSize,
-                        textFieldFocusNode: _textFieldFocusNode,
-                      )
-                    : widget.textFieldBuilder!(
-                        context,
-                        constraints,
-                        controller,
-                        cursorPosition,
-                        fieldsSize,
-                        lastFieldSize,
-                        _textFieldFocusNode,
-                      ),
-              ),
-            );
-          }
-          return Container();
-        });
+                } else {
+                  _isRemovedFieldKeyPressed = false;
+                }
+              },
+              child: widget.textFieldBuilder == null
+                  ? textFieldBuilder(
+                      context: context,
+                      constrains: constraints,
+                      controller: controller,
+                      cursorPosition: cursorPosition,
+                      fieldsSize: fieldsSize,
+                      lastFieldSize: lastFieldSize,
+                      textFieldFocusNode: _textFieldFocusNode,
+                    )
+                  : widget.textFieldBuilder!(
+                      context,
+                      constraints,
+                      controller,
+                      cursorPosition,
+                      fieldsSize,
+                      lastFieldSize,
+                      _textFieldFocusNode,
+                    ),
+            ),
+          );
+        }
+        return Container();
+      },
+    );
   }
 
   /// textFieldBuilder - build twice.
@@ -477,160 +494,6 @@ class _GroupsFieldState extends State<GroupsField> {
       isRemovedFieldKeyPressed: isRemoved,
     );
 
-    _groupsFieldBloc.eventController.add(event);
-  }
-
-  Widget buildFieldsLayout(BoxConstraints constraints) {
-    if (widget.isScrollable) {
-      return SizedBox(
-        key: _fieldsLayoutKey,
-        width: constraints.maxWidth - widget.textFieldWidth,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: StreamBuilder<GroupsFieldState>(
-              stream: _groupsFieldBloc.stateStream.where((event) =>
-                  event is GroupExistedFieldsWidgetsDone ||
-                  event is GroupFieldRemove ||
-                  event is NewFieldAdd ||
-                  event is SuggestionSelect),
-              builder: (context, snapshot) {
-                final state = snapshot.data;
-
-                if (state is GroupExistedFieldsWidgetsDone) {
-                  return buildFields(state.widgets);
-                }
-
-                if (state is GroupFieldRemove) {
-                  return buildFields(state.widgets);
-                }
-
-                if (state is NewFieldAdd) {
-                  return buildFields(state.widgets);
-                }
-
-                if (state is SuggestionSelect) {
-                  return buildFields(state.widgets);
-                }
-
-                return Container();
-              }),
-        ),
-      );
-    } else {
-      return SizedBox(
-        key: _fieldsLayoutKey,
-        width: constraints.maxWidth - widget.textFieldWidth,
-        child: StreamBuilder<GroupsFieldState>(
-            stream: _groupsFieldBloc.stateStream.where((event) =>
-                event is GroupExistedFieldsWidgetsDone ||
-                event is GroupFieldRemove ||
-                event is NewFieldAdd ||
-                event is SuggestionSelect),
-            builder: (context, snapshot) {
-              final state = snapshot.data;
-
-              if (state is GroupExistedFieldsWidgetsDone) {
-                return buildFields(state.widgets);
-              }
-
-              if (state is GroupFieldRemove) {
-                return buildFields(state.widgets);
-              }
-
-              if (state is NewFieldAdd) {
-                return buildFields(state.widgets);
-              }
-
-              if (state is SuggestionSelect) {
-                return buildFields(state.widgets);
-              }
-
-              return Container();
-            }),
-      );
-    }
-  }
-
-  Widget buildFields(List<Widget> fieldsForRender) {
-    return Wrap(
-      key: _fieldsKey,
-      children: [
-        for (final field in fieldsForRender)
-          Container(
-            key: fieldsForRender.last == field ? _lastFieldKey : null,
-            child: field,
-          ),
-      ],
-    );
-  }
-
-  Widget buildSuggestions({
-    required BuildContext context,
-    required List<Widget> suggestions,
-    required List<Object> fields,
-    required Group group,
-    required bool isSuggestionsScrollable,
-  }) {
-    return Container(
-      child: isSuggestionsScrollable
-          ? SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (final suggestion in suggestions)
-                    GestureDetector(
-                      onTap: () {
-                        final event = SuggestionSelected(
-                          suggestion: fields[suggestions.indexOf(suggestion)],
-                          group: group,
-                        );
-
-                        _groupsFieldBloc.eventController.add(event);
-                      },
-                      child: suggestion,
-                    ),
-                ],
-              ),
-            )
-          : Wrap(
-              children: [
-                for (final suggestion in suggestions)
-                  GestureDetector(
-                    onTap: () {
-                      final event = SuggestionSelected(
-                        suggestion: fields[suggestions.indexOf(suggestion)],
-                        group: group,
-                      );
-
-                      _groupsFieldBloc.eventController.add(event);
-                    },
-                    child: suggestion,
-                  ),
-              ],
-            ),
-    );
-  }
-
-  OverlayEntry buildOverlayContainer({
-    required BoxConstraints constrains,
-    required Offset offset,
-    required Widget child,
-  }) {
-    return OverlayEntry(
-      builder: (BuildContext context) {
-        return Positioned(
-          top: offset.dy,
-          left: offset.dx,
-          child: SizedBox(
-            width: constrains.maxWidth,
-            height: constrains.maxHeight,
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: child,
-            ),
-          ),
-        );
-      },
-    );
+    _bloc.eventController.add(event);
   }
 }
