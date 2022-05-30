@@ -252,6 +252,31 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ),
+            Row(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 12),
+                  child: const Text(
+                    "Search:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GroupsField(
+                    isScrollable: false,
+                    textFieldDecoration: InputDecoration(
+                      hintText: 'Some hint?',
+                    ),
+                    groups: [
+                      simpleGroup,
+                      tagsGroup,
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

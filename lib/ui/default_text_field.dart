@@ -9,6 +9,8 @@ class DefaultTextField extends StatelessWidget {
   final FocusNode? textFieldFocusNode;
   final TextEditingController? controller;
 
+  final InputDecoration? inputDecoration;
+
   const DefaultTextField({
     super.key,
     required this.lastFieldSize,
@@ -16,23 +18,28 @@ class DefaultTextField extends StatelessWidget {
     this.onSubmitted,
     this.textFieldFocusNode,
     this.controller,
+    this.inputDecoration,
   });
 
   @override
   Widget build(BuildContext context) {
     final callback = onSubmitted;
 
+    final contentPadding = EdgeInsets.only(
+      top: cursorPosition.dy,
+      left: cursorPosition.dx,
+      bottom: cursorPosition.dy == 0 ? 0 : lastFieldSize.height / 2,
+    );
+
+    final decorator = inputDecoration;
+
     return TextField(
       focusNode: textFieldFocusNode,
       onSubmitted: (_) => callback == null ? null : callback(),
       controller: controller,
-      decoration: InputDecoration(
-        contentPadding: EdgeInsets.only(
-          top: cursorPosition.dy,
-          left: cursorPosition.dx,
-          bottom: cursorPosition.dy == 0 ? 0 : lastFieldSize.height / 2,
-        ),
-      ),
+      decoration: decorator == null
+          ? InputDecoration(contentPadding: contentPadding)
+          : decorator.copyWith(contentPadding: contentPadding, isDense: false),
     );
   }
 }

@@ -53,6 +53,8 @@ class GroupsField extends StatefulWidget {
   final LogicalKeyboardKey keyForTriggerRemoveField;
   final Function? onSubmitted;
 
+  final InputDecoration? textFieldDecoration;
+
   const GroupsField({
     required this.groups,
     super.key,
@@ -68,6 +70,7 @@ class GroupsField extends StatefulWidget {
     this.onSomeFieldOfGroupSelected,
     this.keyForTriggerRemoveField = LogicalKeyboardKey.backspace,
     this.onSubmitted,
+    this.textFieldDecoration,
   });
 
   @override
@@ -364,6 +367,7 @@ class _GroupsFieldState extends State<GroupsField> {
                                     lastFieldSize: lastFieldSize,
                                     onSubmitted: widget.onSubmitted,
                                     textFieldFocusNode: _textFieldFocusNode,
+                                    inputDecoration: widget.textFieldDecoration,
                                   )
                                 : textFieldBuilder(
                                     context,
