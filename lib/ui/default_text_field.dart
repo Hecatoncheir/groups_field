@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
+typedef OnChange = Function(String text);
+
 /// It's a TextField that has a custom cursor position and a custom bottom padding
 class DefaultTextField extends StatelessWidget {
   final Size lastFieldSize;
   final Offset cursorPosition;
 
   final Function? onSubmitted;
+  final OnChange? onChanged;
+
   final FocusNode? textFieldFocusNode;
   final TextEditingController? controller;
 
@@ -16,6 +20,7 @@ class DefaultTextField extends StatelessWidget {
     required this.lastFieldSize,
     required this.cursorPosition,
     this.onSubmitted,
+    this.onChanged,
     this.textFieldFocusNode,
     this.controller,
     this.inputDecoration,
@@ -23,7 +28,8 @@ class DefaultTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final callback = onSubmitted;
+    final onSubmittedCallback = onSubmitted;
+    final onChangeCallback = onChanged;
 
     final contentPadding = EdgeInsets.only(
       top: cursorPosition.dy,
@@ -35,7 +41,10 @@ class DefaultTextField extends StatelessWidget {
 
     return TextField(
       focusNode: textFieldFocusNode,
-      onSubmitted: (_) => callback == null ? null : callback(),
+      onSubmitted: (_) =>
+          onSubmittedCallback == null ? null : onSubmittedCallback(),
+      onChanged: (text) =>
+          onChangeCallback == null ? null : onChangeCallback(text),
       controller: controller,
       decoration: decorator == null
           ? InputDecoration(contentPadding: contentPadding)

@@ -16,6 +16,8 @@ import 'group.dart';
 export 'bloc/groups_field_bloc.dart';
 export 'group.dart';
 
+typedef OnChanged = Function(String text);
+
 /// GroupsField - widget for build ui of custom groups text
 /// by some attributes in one text field.
 /// Just build ui of GroupsField widget with GroupsFieldBloc.
@@ -52,6 +54,7 @@ class GroupsField extends StatefulWidget {
 
   final LogicalKeyboardKey keyForTriggerRemoveField;
   final Function? onSubmitted;
+  final OnChanged? onChanged;
 
   final InputDecoration? textFieldDecoration;
 
@@ -70,6 +73,7 @@ class GroupsField extends StatefulWidget {
     this.onSomeFieldOfGroupSelected,
     this.keyForTriggerRemoveField = LogicalKeyboardKey.backspace,
     this.onSubmitted,
+    this.onChanged,
     this.textFieldDecoration,
   });
 
@@ -366,6 +370,7 @@ class _GroupsFieldState extends State<GroupsField> {
                                     cursorPosition: cursorPosition,
                                     lastFieldSize: lastFieldSize,
                                     onSubmitted: widget.onSubmitted,
+                                    onChanged: widget.onChanged,
                                     textFieldFocusNode: _textFieldFocusNode,
                                     inputDecoration: widget.textFieldDecoration,
                                   )
