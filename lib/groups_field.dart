@@ -162,8 +162,7 @@ class _GroupsFieldState extends State<GroupsField> {
 
         SchedulerBinding.instance.addPostFrameCallback(
           (timeStamp) {
-            _overlayEntry?.remove();
-            _overlayEntry = null;
+            closeOverlay();
 
             final lastChildElement = _lastFieldKey.currentContext == null
                 ? null
@@ -199,8 +198,7 @@ class _GroupsFieldState extends State<GroupsField> {
 
         SchedulerBinding.instance.addPostFrameCallback(
           (timeStamp) {
-            _overlayEntry?.remove();
-            _overlayEntry = null;
+            closeOverlay();
 
             final lastChildElement =
                 _lastFieldKey.currentContext?.findRenderObject() as RenderBox;
@@ -262,18 +260,13 @@ class _GroupsFieldState extends State<GroupsField> {
                     state.group,
                   );
 
-            _overlayEntry?.remove();
-            _overlayEntry = null;
-
             final overlayEntry = buildOverlayContainer(
               child: suggestionsContainer,
               constrains: constrains,
               offset: offset,
             );
-            _overlayEntry = overlayEntry;
 
-            final overlay = Overlay.of(context);
-            overlay?.insert(overlayEntry);
+            openOverlay(overlayEntry);
           }
         });
       }
@@ -291,8 +284,7 @@ class _GroupsFieldState extends State<GroupsField> {
 
         SchedulerBinding.instance.addPostFrameCallback(
           (timeStamp) {
-            _overlayEntry?.remove();
-            _overlayEntry = null;
+            closeOverlay();
 
             final lastChildElement =
                 _lastFieldKey.currentContext?.findRenderObject() as RenderBox;
@@ -414,6 +406,19 @@ class _GroupsFieldState extends State<GroupsField> {
         ),
       ),
     );
+  }
+
+  void openOverlay(OverlayEntry overlayEntry) {
+    _overlayEntry?.remove();
+    _overlayEntry = overlayEntry;
+
+    final overlay = Overlay.of(context);
+    overlay?.insert(overlayEntry);
+  }
+
+  void closeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
   }
 
   /// When the widget is rendered, get the last child element, the parent element,
