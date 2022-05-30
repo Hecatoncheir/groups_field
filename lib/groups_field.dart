@@ -1,3 +1,5 @@
+// ignore_for_file: no-magic-number
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +8,7 @@ import 'ui/fields_not_scrollable.dart';
 import 'ui/fields_scrollable.dart';
 import 'ui/group_suggestions.dart';
 import 'ui/overlay_container.dart';
+import 'ui/default_text_field.dart';
 
 import 'bloc/groups_field_bloc.dart';
 import 'group.dart';
@@ -81,7 +84,6 @@ class _GroupsFieldState extends State<GroupsField> {
 
   late final FocusNode _focusNode;
   late final FocusNode _textFieldFocusNode;
-  late bool _isRemovedFieldKeyPressed;
 
   OverlayEntry? _overlayEntry;
 
@@ -97,17 +99,6 @@ class _GroupsFieldState extends State<GroupsField> {
     _textFieldKey = GlobalKey();
 
     _textEditingController = TextEditingController();
-    _textEditingController.addListener(() {
-      if (!_isRemovedFieldKeyPressed) {
-        textFieldOnChangeHandler(
-          context: context,
-          fieldText: _textEditingController.text,
-          isRemoved: _isRemovedFieldKeyPressed,
-        );
-      }
-    });
-
-    _isRemovedFieldKeyPressed = false;
 
     _focusNode = FocusNode();
     _textFieldFocusNode = FocusNode();
@@ -164,9 +155,12 @@ class _GroupsFieldState extends State<GroupsField> {
 
         SchedulerBinding.instance.addPostFrameCallback(
           (timeStamp) {
+            _overlayEntry?.remove();
+            _overlayEntry = null;
+
             final lastChildElement = _lastFieldKey.currentContext == null
                 ? null
-                : _lastFieldKey.currentContext!.findRenderObject() as RenderBox;
+                : _lastFieldKey.currentContext?.findRenderObject() as RenderBox;
 
             final parentElement =
                 _fieldsKey.currentContext?.findRenderObject() as RenderBox;
@@ -198,14 +192,17 @@ class _GroupsFieldState extends State<GroupsField> {
 
         SchedulerBinding.instance.addPostFrameCallback(
           (timeStamp) {
+            _overlayEntry?.remove();
+            _overlayEntry = null;
+
             final lastChildElement =
-                _lastFieldKey.currentContext!.findRenderObject() as RenderBox;
+                _lastFieldKey.currentContext?.findRenderObject() as RenderBox;
 
             final parentElement =
-                _fieldsKey.currentContext!.findRenderObject() as RenderBox;
+                _fieldsKey.currentContext?.findRenderObject() as RenderBox;
 
-            final parentLayoutElement = _fieldsLayoutKey.currentContext!
-                .findRenderObject() as RenderBox;
+            final parentLayoutElement = _fieldsLayoutKey.currentContext
+                ?.findRenderObject() as RenderBox;
 
             final event = GroupFieldsRendered(
               lastChildElement: lastChildElement,
@@ -220,13 +217,9 @@ class _GroupsFieldState extends State<GroupsField> {
 
       if (state is SuggestionsReady) {
         SchedulerBinding.instance.addPostFrameCallback((_) {
-          if (_overlayEntry != null) {
-            _overlayEntry!.remove();
-            _overlayEntry = null;
-          }
-
           if (state.widgets.isNotEmpty) {
-            final size = _textFieldKey.currentContext!.size!;
+            final size = _textFieldKey.currentContext?.size;
+            if (size == null) return;
 
             final constrains = BoxConstraints(
               minWidth: size.width,
@@ -236,7 +229,7 @@ class _GroupsFieldState extends State<GroupsField> {
             );
 
             final textFieldElement =
-                _textFieldKey.currentContext!.findRenderObject() as RenderBox;
+                _textFieldKey.currentContext?.findRenderObject() as RenderBox;
 
             final offsetOfTextField =
                 textFieldElement.localToGlobal(Offset.zero);
@@ -246,34 +239,34 @@ class _GroupsFieldState extends State<GroupsField> {
               offsetOfTextField.dy + textFieldElement.size.height,
             );
 
-            Widget suggestionsContainer;
-
             final suggestionsAreaBuilder = widget.suggestionsAreaBuilder;
-            if (suggestionsAreaBuilder == null) {
-              suggestionsContainer = GroupSuggestions(
-                bloc: _bloc,
-                suggestions: state.widgets,
-                fields: state.fields,
-                group: state.group,
-              );
-            } else {
-              suggestionsContainer = suggestionsAreaBuilder(
-                constrains,
-                offset,
-                state.widgets,
-                state.fields,
-                state.group,
-              );
-            }
+            final suggestionsContainer = suggestionsAreaBuilder == null
+                ? GroupSuggestions(
+                    bloc: _bloc,
+                    suggestions: state.widgets,
+                    fields: state.fields,
+                    group: state.group,
+                  )
+                : suggestionsAreaBuilder(
+                    constrains,
+                    offset,
+                    state.widgets,
+                    state.fields,
+                    state.group,
+                  );
 
-            _overlayEntry = buildOverlayContainer(
+            _overlayEntry?.remove();
+            _overlayEntry = null;
+
+            final overlayEntry = buildOverlayContainer(
               child: suggestionsContainer,
               constrains: constrains,
               offset: offset,
             );
+            _overlayEntry = overlayEntry;
 
             final overlay = Overlay.of(context);
-            overlay?.insert(_overlayEntry!);
+            overlay?.insert(overlayEntry);
           }
         });
       }
@@ -288,19 +281,20 @@ class _GroupsFieldState extends State<GroupsField> {
         }
 
         _textEditingController.clear();
-        _overlayEntry?.remove();
-        _overlayEntry = null;
 
         SchedulerBinding.instance.addPostFrameCallback(
           (timeStamp) {
+            _overlayEntry?.remove();
+            _overlayEntry = null;
+
             final lastChildElement =
-                _lastFieldKey.currentContext!.findRenderObject() as RenderBox;
+                _lastFieldKey.currentContext?.findRenderObject() as RenderBox;
 
             final parentElement =
-                _fieldsKey.currentContext!.findRenderObject() as RenderBox;
+                _fieldsKey.currentContext?.findRenderObject() as RenderBox;
 
-            final parentLayoutElement = _fieldsLayoutKey.currentContext!
-                .findRenderObject() as RenderBox;
+            final parentLayoutElement = _fieldsLayoutKey.currentContext
+                ?.findRenderObject() as RenderBox;
 
             final event = GroupFieldsRendered(
               lastChildElement: lastChildElement,
@@ -344,7 +338,48 @@ class _GroupsFieldState extends State<GroupsField> {
               return Stack(
                 alignment: Alignment.centerLeft,
                 children: [
-                  buildTextField(constraints),
+                  StreamBuilder<GroupsFieldState>(
+                    stream: _bloc.stateStream
+                        .where((event) => event is CursorPositionUpdate),
+                    builder: (context, snapshot) {
+                      final state = snapshot.data;
+
+                      final textFieldBuilder = widget.textFieldBuilder;
+
+                      if (state is CursorPositionUpdate) {
+                        final controller = _textEditingController;
+                        final cursorPosition = state.cursorPosition;
+                        final fieldsSize = state.fieldsSize;
+                        final lastFieldSize = state.lastFieldSize;
+
+                        return Container(
+                          key: _textFieldKey,
+                          child: RawKeyboardListener(
+                            focusNode: _focusNode,
+                            onKey: textFieldOnKeyPressed,
+                            child: textFieldBuilder == null
+                                ? DefaultTextField(
+                                    controller: controller,
+                                    cursorPosition: cursorPosition,
+                                    lastFieldSize: lastFieldSize,
+                                    onSubmitted: widget.onSubmitted,
+                                    textFieldFocusNode: _textFieldFocusNode,
+                                  )
+                                : textFieldBuilder(
+                                    context,
+                                    constraints,
+                                    controller,
+                                    cursorPosition,
+                                    fieldsSize,
+                                    lastFieldSize,
+                                    _textFieldFocusNode,
+                                  ),
+                          ),
+                        );
+                      }
+                      return Container();
+                    },
+                  ),
                   SizedBox(
                     key: _fieldsLayoutKey,
                     width: constraints.maxWidth - widget.textFieldWidth,
@@ -372,16 +407,18 @@ class _GroupsFieldState extends State<GroupsField> {
     );
   }
 
+  /// When the widget is rendered, get the last child element, the parent element,
+  /// and the parent layout element, and then send a SizeChanged event to the bloc
   Future<void> onSizeChanged() async {
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       final lastChildElement =
           _lastFieldKey.currentContext?.findRenderObject() as RenderBox?;
 
       final parentElement =
-          _fieldsKey.currentContext!.findRenderObject() as RenderBox;
+          _fieldsKey.currentContext?.findRenderObject() as RenderBox;
 
       final parentLayoutElement =
-          _fieldsLayoutKey.currentContext!.findRenderObject() as RenderBox;
+          _fieldsLayoutKey.currentContext?.findRenderObject() as RenderBox;
 
       final event = SizeChanged(
         lastChildElement: lastChildElement,
@@ -393,107 +430,31 @@ class _GroupsFieldState extends State<GroupsField> {
     });
   }
 
-  Widget buildTextField(BoxConstraints constraints) {
-    return StreamBuilder<GroupsFieldState>(
-      stream: _bloc.stateStream.where((event) => event is CursorPositionUpdate),
-      builder: (context, snapshot) {
-        final state = snapshot.data;
+  /// If the user presses the key that is set to trigger the removal of the text
+  /// field, and the text field is empty, then remove the text field
+  ///
+  /// Args:
+  ///   event (RawKeyEvent): The event that was triggered.
+  void textFieldOnKeyPressed(RawKeyEvent event) {
+    final text = _textEditingController.text;
 
-        if (state is CursorPositionUpdate) {
-          final controller = _textEditingController;
-          final cursorPosition = state.cursorPosition;
-          final fieldsSize = state.fieldsSize;
-          final lastFieldSize = state.lastFieldSize;
+    if (event is RawKeyUpEvent &&
+        event.logicalKey == widget.keyForTriggerRemoveField) {
+      if (text.isEmpty) {
+        final event = TextFieldChanged(
+          textFieldValue: text,
+          isRemovedFieldKeyPressed: true,
+        );
 
-          return Container(
-            key: _textFieldKey,
-            child: RawKeyboardListener(
-              focusNode: _focusNode,
-              onKey: (event) {
-                if (event is RawKeyUpEvent &&
-                    event.logicalKey == widget.keyForTriggerRemoveField) {
-                  _isRemovedFieldKeyPressed = true;
-                  final currentText = _textEditingController.text;
-                  if (currentText.isEmpty) {
-                    if (_overlayEntry != null) {
-                      _overlayEntry!.remove();
-                      _overlayEntry = null;
-                    }
+        _bloc.eventController.add(event);
+      }
+    } else {
+      final event = TextFieldChanged(
+        textFieldValue: text,
+        isRemovedFieldKeyPressed: false,
+      );
 
-                    textFieldOnChangeHandler(
-                      context: context,
-                      fieldText: _textEditingController.text,
-                      isRemoved: _isRemovedFieldKeyPressed,
-                    );
-                  }
-                } else {
-                  _isRemovedFieldKeyPressed = false;
-                }
-              },
-              child: widget.textFieldBuilder == null
-                  ? textFieldBuilder(
-                      context: context,
-                      constrains: constraints,
-                      controller: controller,
-                      cursorPosition: cursorPosition,
-                      fieldsSize: fieldsSize,
-                      lastFieldSize: lastFieldSize,
-                      textFieldFocusNode: _textFieldFocusNode,
-                    )
-                  : widget.textFieldBuilder!(
-                      context,
-                      constraints,
-                      controller,
-                      cursorPosition,
-                      fieldsSize,
-                      lastFieldSize,
-                      _textFieldFocusNode,
-                    ),
-            ),
-          );
-        }
-        return Container();
-      },
-    );
-  }
-
-  /// textFieldBuilder - build twice.
-  /// First build with default cursor position
-  /// offset and second with other offset.
-  Widget textFieldBuilder({
-    required BuildContext context,
-    required BoxConstraints constrains,
-    required TextEditingController controller,
-    required Offset cursorPosition,
-    required Size fieldsSize,
-    required Size lastFieldSize,
-    required FocusNode textFieldFocusNode,
-  }) {
-    return TextField(
-      focusNode: textFieldFocusNode,
-      onSubmitted: (_) =>
-          widget.onSubmitted == null ? null : widget.onSubmitted!(),
-      controller: controller,
-      decoration: InputDecoration(
-        contentPadding: EdgeInsets.only(
-          top: cursorPosition.dy,
-          left: cursorPosition.dx,
-          bottom: cursorPosition.dy == 0 ? 0 : lastFieldSize.height / 2,
-        ),
-      ),
-    );
-  }
-
-  void textFieldOnChangeHandler({
-    required BuildContext context,
-    required String fieldText,
-    required bool isRemoved,
-  }) {
-    final event = TextFieldChanged(
-      textFieldValue: fieldText,
-      isRemovedFieldKeyPressed: isRemoved,
-    );
-
-    _bloc.eventController.add(event);
+      _bloc.eventController.add(event);
+    }
   }
 }

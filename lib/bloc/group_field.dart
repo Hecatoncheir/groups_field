@@ -4,6 +4,8 @@ class GroupField {
   final String text;
   final Group group;
   final Widget widget;
+
+  // ignore: no-object-declaration
   final Object field;
 
   GroupField({

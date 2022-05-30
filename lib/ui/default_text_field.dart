@@ -1,25 +1,30 @@
 import 'package:flutter/material.dart';
 
-class DefaultTextField extends StatefulWidget {
-  const DefaultTextField({super.key});
+/// It's a TextField that has a custom cursor position and a custom bottom padding
+class DefaultTextField extends StatelessWidget {
+  final Size lastFieldSize;
+  final Offset cursorPosition;
 
-  @override
-  State<DefaultTextField> createState() => _DefaultTextFieldState();
-}
+  final Function? onSubmitted;
+  final FocusNode? textFieldFocusNode;
+  final TextEditingController? controller;
 
-class _DefaultTextFieldState extends State<DefaultTextField> {
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
+  const DefaultTextField({
+    super.key,
+    required this.lastFieldSize,
+    required this.cursorPosition,
+    this.onSubmitted,
+    this.textFieldFocusNode,
+    this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final callback = onSubmitted;
+
     return TextField(
       focusNode: textFieldFocusNode,
-      onSubmitted: (_) =>
-          widget.onSubmitted == null ? null : widget.onSubmitted!(),
+      onSubmitted: (_) => callback == null ? null : callback(),
       controller: controller,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.only(

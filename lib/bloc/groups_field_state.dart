@@ -35,7 +35,9 @@ class GroupFieldRemove extends GroupsFieldState {
   final List<Widget> widgets;
   final String removedFieldText;
 
+  // ignore: no-object-declaration
   final Object removedField;
+
   final Group removedFieldGroup;
 
   GroupFieldRemove({
@@ -52,7 +54,10 @@ class NewFieldAdd extends GroupsFieldState {
   final String newFieldText;
 
   final Widget addedFieldWidget;
+
+  // ignore: no-object-declaration
   final Object addedField;
+
   final Group addedFieldGroup;
 
   NewFieldAdd({
@@ -82,7 +87,10 @@ class SuggestionsReady extends GroupsFieldState {
 class SuggestionSelect extends GroupsFieldState {
   /// widgets - already build fields in groups.
   final List<Widget> widgets;
+
+  // ignore: no-object-declaration
   final Object field;
+
   final Group group;
   final String text;
 

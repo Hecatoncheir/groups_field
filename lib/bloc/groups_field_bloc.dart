@@ -1,3 +1,5 @@
+// ignore_for_file: no-magic-number
+
 import 'dart:async';
 
 import 'package:pedantic/pedantic.dart';
@@ -6,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:groups_field/group.dart';
 
-part 'interface.dart';
+part 'groups_field_bloc_interface.dart';
 part 'group_field.dart';
 part 'groups_field_event.dart';
 part 'groups_field_state.dart';
@@ -26,7 +28,7 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
   @visibleForTesting
   List<GroupField> fields;
 
-  String _textFieldValue;
+  String textFieldValue;
 
   late final StreamController<GroupsFieldState> stateController;
 
@@ -43,8 +45,8 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
     required this.delimiters,
     required this.isFieldCanBeDeleted,
     this.isScrollable = false,
-  })  : fields = <GroupField>[],
-        _textFieldValue = "" {
+    this.textFieldValue = "",
+  }) : fields = <GroupField>[] {
     stateController = StreamController<GroupsFieldState>();
     stateStream =
         stateController.stream.asBroadcastStream().asBroadcastStream();
@@ -71,7 +73,7 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
 
   @visibleForTesting
   Future<void> prepareExistedGroupsFieldsWidgets(
-    PrepareExistedGroupsFieldsWidgets event,
+    PrepareExistedGroupsFieldsWidgets _,
   ) async {
     fields = prepareExistedGroupsFields(groups: groups);
     final widgets = fields.map((field) => field.widget).toList();
@@ -110,15 +112,9 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
       isScrollable: isScrollable,
     );
 
-    Size fieldsSize;
-    if (isScrollable) {
-      fieldsSize = event.parentLayoutElement.size;
-    } else {
-      fieldsSize = Size(
-        cursorPosition.dx,
-        event.parentLayoutElement.size.height,
-      );
-    }
+    final fieldsSize = isScrollable
+        ? event.parentLayoutElement.size
+        : Size(cursorPosition.dx, event.parentLayoutElement.size.height);
 
     final lastChildElement = event.lastChildElement;
     final lastFieldSize =
@@ -192,7 +188,7 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
       }
     }
 
-    final previousTextFieldValue = _textFieldValue;
+    final previousTextFieldValue = textFieldValue;
 
     /// latest field must be removed.
     if (event.isRemovedFieldKeyPressed &&
@@ -221,7 +217,7 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
 
       stateController.add(state);
 
-      _textFieldValue = event.textFieldValue;
+      textFieldValue = event.textFieldValue;
     } else {
       // Check is new text must be a field.
 
@@ -260,9 +256,9 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
 
         stateController.add(state);
 
-        _textFieldValue = "";
+        textFieldValue = "";
       } else {
-        _textFieldValue = event.textFieldValue;
+        textFieldValue = event.textFieldValue;
       }
     }
   }
@@ -416,21 +412,17 @@ class GroupsFieldBloc implements GroupsFieldBlocInterface {
     Offset cursorPosition;
 
     if (isScrollable) {
-      if (parentElement == null) {
-        cursorPosition = const Offset(0, 0);
-      } else {
-        if (parentElement.size.width < parentLayoutElement.size.width) {
-          cursorPosition = Offset(
-            parentElement.size.width,
-            parentElement.size.height / 2,
-          );
-        } else {
-          cursorPosition = Offset(
-            parentLayoutElement.size.width,
-            parentLayoutElement.size.height / 2,
-          );
-        }
-      }
+      cursorPosition = parentElement == null
+          ? const Offset(0, 0)
+          : parentElement.size.width < parentLayoutElement.size.width
+              ? Offset(
+                  parentElement.size.width,
+                  parentElement.size.height / 2,
+                )
+              : Offset(
+                  parentLayoutElement.size.width,
+                  parentLayoutElement.size.height / 2,
+                );
     } else {
       Offset offset;
 

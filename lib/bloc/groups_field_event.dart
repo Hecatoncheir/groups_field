@@ -41,6 +41,8 @@ class TextFieldChanged extends GroupsFieldEvent {
 
 class SuggestionSelected extends GroupsFieldEvent {
   final Group group;
+
+  // ignore: no-object-declaration
   final Object suggestion;
 
   SuggestionSelected({
